@@ -9,6 +9,21 @@ observed across the enabled providers.
 No API keys, no accounts: the extension only reads public, anonymous status
 feeds.
 
+## Usage and spending limits
+
+The extension can follow per-provider usage and spending limits when the
+provider exposes a usage API reachable with an API key. This requires a
+provider-specific endpoint: without such a resource there is nothing to
+query.
+
+**Mistral**: not planned. Mistral's usage and spend-limit data is only
+exposed through the Admin API (`api.mistral.ai/v1/admin/...`), which
+requires an Enterprise plan and a dedicated Admin API key created in the
+Backoffice. A standard user API key never grants admin access, and there
+is no other public or key-scoped endpoint to read personal usage. The
+Mistral entry in the provider catalog is therefore disabled by default and
+cannot show usage data on standard accounts.
+
 Inspired by [3389ro/ai-status-monitor](https://github.com/3389ro/ai-status-monitor)
 and [montanhes/claude-status](https://github.com/montanhes/claude-status).
 
