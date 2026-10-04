@@ -3,6 +3,7 @@
 // GJS widgets and keeps the enable()/disable() lifecycle clean.
 import St from 'gi://St';
 import GLib from 'gi://GLib';
+import GObject from 'gi://GObject';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import {gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
@@ -17,18 +18,19 @@ import {
 } from './statusModel.js';
 import {StatusFetcher} from './statusFetcher.js';
 
-export class Indicator extends PanelMenu.Button {
-    constructor({extensionPath, openPreferences, settings}) {
-        super(0.0, _('AI Status Monitor'));
-        this._extensionPath = extensionPath;
-        this._openPreferences = openPreferences;
-        this._settings = settings;
-        this._pollTimeoutId = null;
-        this._fetcher = new StatusFetcher();
-        this._statuses = new Map();
-        this._menuItems = new Map();
-        this._settingsConnections = [];
-    }
+export const Indicator = GObject.registerClass(
+    class Indicator extends PanelMenu.Button {
+        constructor({extensionPath, openPreferences, settings}) {
+            super(0.0, _('AI Status Monitor'));
+            this._extensionPath = extensionPath;
+            this._openPreferences = openPreferences;
+            this._settings = settings;
+            this._pollTimeoutId = null;
+            this._fetcher = new StatusFetcher();
+            this._statuses = new Map();
+            this._menuItems = new Map();
+            this._settingsConnections = [];
+        }
 
     setup() {
         this._addIcon();
@@ -145,4 +147,4 @@ export class Indicator extends PanelMenu.Button {
         this._fetcher.destroy();
         super.destroy();
     }
-}
+    });
