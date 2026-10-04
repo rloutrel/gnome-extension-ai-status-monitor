@@ -51,6 +51,75 @@ export function fromStatuspageComponent(componentStatus) {
     return STATUSPAGE_COMPONENT_MAP[componentStatus] ?? STATUS_UNKNOWN;
 }
 
+// Maps a Mistral Admin usage + spend-limit payload pair to a status and
+// a normalized usage summary for the menu progress bar.
+// - usage: /v1/admin/usage response (cost per category, currency, period)
+// - spendLimit: /v1/admin/spend-limit response (amount, no_monthly_limit)
+// Defensive: the Admin API is in Preview and field names may change.
+export function fromMistralAdmin(usage, spendLimit) {
+    const used = extractTotalCost(usage);
+    const currency = typeof usage?.currency === 'string'
+        ? usage.currency
+        : null;
+    const limit = extractSpendLimit(spendLimit);
+    if (used === null)
+        return {status: STATUS_UNKNOWN, usage: null};
+    if (limit === null || limit <= 0)
+        return {
+            status: STATUS_OPERATIONAL,
+            usage: {used, limit: null, currency, percent: null},
+        };
+    const percent = Math.round((used / limit) * 100);
+    let status;
+    if (percent >= 100)
+        status = STATUS_MAJOR_OUTAGE;
+    else if (percent >= 80)
+        status = STATUS_DEGRADED;
+    else
+        status = STATUS_OPERATIONAL;
+    return {status, usage: {used, limit, currency, percent}};
+}
+
+function extractTotalCost(usage) {
+    if (!usage || typeof usage !== 'object')
+        return null;
+    if (typeof usage.total_cost === 'number')
+        return usage.total_cost;
+    if (typeof usage.amount === 'number')
+        return usage.amount;
+    const categories = usage.usage ?? usage.categories ?? usage;
+    if (!categories || typeof categories !== 'object')
+        return null;
+    let total = 0;
+    let found = false;
+    for (const value of Object.values(categories)) {
+        const cost = typeof value === 'number'
+            ? value
+            : value?.cost ?? value?.amount ?? value?.total;
+        if (typeof cost === 'number') {
+            total += cost;
+            found = true;
+        }
+    }
+    return found ? total : null;
+}
+
+function extractSpendLimit(spendLimit) {
+    if (!spendLimit || typeof spendLimit !== 'object')
+        return null;
+    if (spendLimit.no_monthly_limit === true)
+        return null;
+    if (typeof spendLimit.amount === 'number')
+        return spendLimit.amount;
+    const inner = spendLimit.spend_limit ?? spendLimit.limit;
+    if (typeof inner === 'number')
+        return inner;
+    if (inner && typeof inner === 'object' &&
+        typeof inner.amount === 'number')
+        return inner.amount;
+    return null;
+}
+
 export function fromStatuspageSummary(summary) {
     if (!summary || typeof summary !== 'object')
         return STATUS_UNKNOWN;

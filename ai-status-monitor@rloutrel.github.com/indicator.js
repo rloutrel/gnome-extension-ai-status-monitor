@@ -17,6 +17,8 @@ import {
     themeClasses,
 } from './statusModel.js';
 import {StatusFetcher} from './statusFetcher.js';
+import {formatUsage} from './usageFormat.js';
+import {drawUsageBar} from './usageBar.js';
 
 export const Indicator = GObject.registerClass(
     class Indicator extends PanelMenu.Button {
@@ -83,7 +85,33 @@ export const Indicator = GObject.registerClass(
                     `xdg-open ${provider.pageUrl}`);
             });
             this.menu.addMenuItem(item);
-            this._menuItems.set(provider.id, {item, dot});
+
+            if (provider.requiresApiKey) {
+                const usageBox = new St.BoxLayout({
+                    vertical: true,
+                    style_class: 'ai-status-monitor-usage-box',
+                });
+                const usageBar = new St.DrawingArea({
+                    style_class: 'ai-status-monitor-usage-bar',
+                });
+                usageBar.connect('repaint', bar => drawUsageBar(bar, bar.value));
+                usageBar.value = 0;
+                usageBar.visible = false;
+                const usageLabel = new St.Label({
+                    style_class: 'ai-status-monitor-usage-label',
+                });
+                usageBox.add_child(usageBar);
+                usageBox.add_child(usageLabel);
+                const usageItem = new PopupMenu.PopupBaseMenuItem({
+                    reactive: false,
+                    can_focus: false,
+                });
+                usageItem.add_child(usageBox);
+                this.menu.addMenuItem(usageItem);
+                this._menuItems.set(provider.id, {item, dot, usageBox, usageBar, usageLabel});
+            } else {
+                this._menuItems.set(provider.id, {item, dot});
+            }
         }
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
         this.menu.addAction(_('Preferences'), () => this._openPreferences());
@@ -109,15 +137,19 @@ export const Indicator = GObject.registerClass(
     }
 
     _refresh() {
+        const keys = this._settings.get_value('api-keys').deepUnpack();
         for (const provider of this._enabledProviders()) {
-            this._fetcher.fetch(provider, ({status}) => {
+            const target = provider.requiresApiKey
+                ? {...provider, apiKey: keys[provider.id] ?? null}
+                : provider;
+            this._fetcher.fetch(target, ({status, usage}) => {
                 this._statuses.set(provider.id, status);
-                this._applyStatus(provider.id, status);
+                this._applyStatus(provider.id, status, usage);
             });
         }
     }
 
-    _applyStatus(providerId, status) {
+    _applyStatus(providerId, status, usage = null) {
         const entry = this._menuItems.get(providerId);
         if (!entry)
             return;
@@ -128,7 +160,28 @@ export const Indicator = GObject.registerClass(
         entry.dot.add_style_class_name(...themeClasses(status));
         entry.item.label.text =
             `${entry.item.label.text.split(' — ')[0]} — ${describe(status)}`;
+        this._applyUsage(providerId, usage, status);
         this._updateIcon();
+    }
+
+    _applyUsage(providerId, usage, status) {
+        const entry = this._menuItems.get(providerId);
+        if (!entry.usageBox)
+            return;
+        const percent = usage?.percent;
+        if (percent !== null && percent !== undefined) {
+            entry.usageBar.value = Math.min(1, percent / 100);
+            entry.usageBar.visible = true;
+            entry.usageLabel.text = formatUsage(usage);
+        } else if (usage) {
+            entry.usageBar.visible = false;
+            entry.usageLabel.text = formatUsage(usage);
+        } else {
+            entry.usageBar.visible = false;
+            entry.usageLabel.text = '';
+        }
+        for (const cls of themeClasses(status))
+            entry.usageBar.add_style_class_name(cls);
     }
 
     _updateIcon() {

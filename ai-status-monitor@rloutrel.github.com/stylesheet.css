@@ -21,3 +21,18 @@
 .ai-status-monitor-dot-maintenance {
     color: inherit;
 }
+
+.ai-status-monitor-usage-box {
+    margin-left: 8px;
+    margin-right: 8px;
+    spacing: 4px;
+}
+
+.ai-status-monitor-usage-bar {
+    height: 6px;
+    border-radius: 3px;
+}
+
+.ai-status-monitor-usage-label {
+    font-size: 0.9em;
+}

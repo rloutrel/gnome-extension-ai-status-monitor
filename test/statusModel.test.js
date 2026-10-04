@@ -18,6 +18,7 @@ import {
     fromStatuspageIndicator,
     fromStatuspageComponent,
     fromStatuspageSummary,
+    fromMistralAdmin,
     worstOf,
     describe,
     themeClasses,
@@ -143,4 +144,30 @@ test('providers: enabledProviders filters and keeps order', () => {
     const enabled = enabledProviders(['perplexity', 'openai']);
     assert.deepEqual(enabled.map(p => p.id), ['openai', 'perplexity']);
     assert.deepEqual(enabledProviders([]), []);
+});
+
+test('fromMistralAdmin: computes budget percentage and status', () => {
+    const r1 = fromMistralAdmin({total_cost: 4, currency: 'EUR'}, {amount: 10});
+    assert.equal(r1.status, STATUS_OPERATIONAL);
+    assert.deepEqual(r1.usage,
+        {used: 4, limit: 10, currency: 'EUR', percent: 40});
+
+    const r2 = fromMistralAdmin({usage: {chat: 8, completion: 2}}, {amount: 10});
+    assert.equal(r2.status, STATUS_MAJOR_OUTAGE);
+    assert.equal(r2.usage.percent, 100);
+
+    const r3 = fromMistralAdmin({amount: 9}, {amount: 10});
+    assert.equal(r3.status, STATUS_DEGRADED);
+    assert.equal(r3.usage.percent, 90);
+});
+
+test('fromMistralAdmin: no limit or unknown payload', () => {
+    const r1 = fromMistralAdmin({amount: 5}, {no_monthly_limit: true});
+    assert.equal(r1.status, STATUS_OPERATIONAL);
+    assert.equal(r1.usage.limit, null);
+    assert.equal(r1.usage.percent, null);
+
+    const r2 = fromMistralAdmin(null, {});
+    assert.equal(r2.status, STATUS_UNKNOWN);
+    assert.equal(r2.usage, null);
 });

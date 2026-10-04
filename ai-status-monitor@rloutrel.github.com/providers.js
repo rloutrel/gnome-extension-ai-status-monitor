@@ -26,6 +26,7 @@ export const PROVIDERS = [
         name: 'Mistral',
         feed: FEED_MISTRAL_ADMIN,
         statusUrl: 'https://api.mistral.ai/v1/admin/usage',
+        spendLimitUrl: 'https://api.mistral.ai/v1/admin/spend-limit',
         pageUrl: 'https://console.mistral.ai/',
         requiresApiKey: true,
         keyUrl: 'https://console.mistral.ai/api-keys/new',
