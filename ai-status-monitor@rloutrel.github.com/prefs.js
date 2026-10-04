@@ -7,8 +7,8 @@ import Gtk from 'gi://Gtk';
 import {ExtensionPreferences, gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 import {PROVIDERS, defaultEnabledIds} from './providers.js';
 
-const MISTRAL_BACKOFFICE_API_KEYS_URL =
-    'https://backoffice.mistral.ai/';
+const MISTRAL_CONSOLE_API_KEY_URL =
+    'https://console.mistral.ai/api-keys/new';
 
 export default class AiStatusMonitorPreferences extends ExtensionPreferences {
     fillPreferencesWindow(window) {
@@ -80,7 +80,7 @@ export default class AiStatusMonitorPreferences extends ExtensionPreferences {
             valign: Gtk.Align.CENTER,
         });
         generateKeyButton.connect('clicked', () => {
-            Gtk.show_uri(window, MISTRAL_BACKOFFICE_API_KEYS_URL,
+            Gtk.show_uri(window, MISTRAL_CONSOLE_API_KEY_URL,
                 Gdk.CURRENT_TIME);
         });
         apiKeyRow.add_suffix(generateKeyButton);
