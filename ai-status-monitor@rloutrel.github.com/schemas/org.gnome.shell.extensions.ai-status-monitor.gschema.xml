@@ -7,6 +7,11 @@
       <summary>Enabled providers</summary>
       <description>List of AI provider IDs whose status pages are monitored</description>
     </key>
+    <key name="api-keys" type="a{ss}">
+      <default>{}</default>
+      <summary>Provider API keys</summary>
+      <description>Map of provider ID to its API key</description>
+    </key>
     <key name="poll-interval" type="i">
       <default>300</default>
       <summary>Poll interval in seconds</summary>
