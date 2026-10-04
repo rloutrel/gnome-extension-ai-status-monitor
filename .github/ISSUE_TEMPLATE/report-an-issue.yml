@@ -1,0 +1,85 @@
+name: Report an issue
+description: Report a bug or unexpected behaviour in the extension
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report an issue! Please fill in the
+        details below so it can be reproduced and diagnosed.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear description of the problem. What happened, and what did you expect instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open the menu
+        2. ...
+        3. ...
+    validations:
+      required: true
+
+  - type: input
+    id: gnome-version
+    attributes:
+      label: GNOME Shell version
+      placeholder: e.g. "48.2"
+    validations:
+      required: true
+
+  - type: input
+    id: extension-version
+    attributes:
+      label: Extension version
+      description: The version shown in the Extensions app or `gnome-extensions info ai-status-monitor@rloutrel.github.com`.
+      placeholder: e.g. "17"
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment details
+      description: Any external tool or dependency versions relevant to the issue.
+      placeholder: e.g. "tool x.y.z"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: install-method
+    attributes:
+      label: Installation method
+      options:
+        - Extensions website (ego.gnome.org)
+        - Manual install from source
+        - Package manager (distro package / AUR / etc.)
+    validations:
+      required: true
+
+  - type: textarea
+    id: device-info
+    attributes:
+      label: Additional information (optional)
+      description: Any relevant command output, JSON dumps or screenshots that help diagnose the issue. Redact serial numbers and personal data.
+    validations:
+      required: false
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: |
+        Output of `journalctl -r -o cat /usr/bin/gnome-shell | grep Template` (last lines).
+        Also useful: Looking Glass logs (`lg`, extension logs).
+      render: shell
+    validations:
+      required: false
+

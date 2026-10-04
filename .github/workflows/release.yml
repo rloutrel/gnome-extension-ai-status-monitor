@@ -1,0 +1,80 @@
+name: release
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gettext libglib2.0-dev-bin libxml2-utils zip
+      - name: Validate metadata
+        run: node "test/validateMetadata.js"
+      - name: Validate GSettings schema (compiled schemas are not shipped since GNOME 45)
+        run: |
+          xmllint --noout "ai-status-monitor@rloutrel.github.com/schemas/org.gnome.shell.extensions.ai-status-monitor.gschema.xml"
+          rm -f "ai-status-monitor@rloutrel.github.com/schemas/gschemas.compiled"
+      - name: Compile translations
+        run: |
+          domain="ai-status-monitor@rloutrel.github.com"
+          for po in po/*.po; do
+            [ -e "$po" ] || continue
+            lang=$(basename "$po" .po)
+            dir="ai-status-monitor@rloutrel.github.com/locale/$lang/LC_MESSAGES"
+            mkdir -p "$dir"
+            msgfmt --check --output-file="$dir/$domain.mo" "$po"
+          done
+      - name: Assemble extension zip
+        working-directory: ai-status-monitor@rloutrel.github.com
+        run: |
+          zip -r "../ai-status-monitor@rloutrel.github.com.zip" . \
+            -x 'schemas/gschemas.compiled'
+          unzip -l "../ai-status-monitor@rloutrel.github.com.zip"
+      - name: Validate zip structure
+        run: |
+          python3 - <<'EOF'
+          import os
+          import sys
+          import zipfile
+
+          path = 'ai-status-monitor@rloutrel.github.com.zip'
+          uuid = 'ai-status-monitor@rloutrel.github.com'
+          errors = []
+          total = 0
+
+          with zipfile.ZipFile(path) as archive:
+              names = archive.namelist()
+              if 'metadata.json' not in names:
+                  errors.append('metadata.json missing at archive root')
+              if 'extension.js' not in names:
+                  errors.append('extension.js missing at archive root')
+              elif archive.getinfo('extension.js').file_size == 0:
+                  errors.append('extension.js is empty at archive root')
+              nested = [n for n in names if n.startswith(f'{uuid}/')]
+              if nested:
+                  errors.append(f'{len(nested)} entries nested under {uuid}/: {nested[:3]}')
+              if 'schemas/gschemas.compiled' in names:
+                  errors.append('schemas/gschemas.compiled must not be shipped: GNOME Shell recompiles schemas at install time since version 45')
+              total = sum(i.file_size for i in archive.infolist()
+                          if not i.is_dir())
+              if total > 5 * 1024 * 1024:
+                  errors.append(f'uncompressed size {total} bytes exceeds 5 MB limit')
+
+          if errors:
+              for error in errors:
+                  print(f'::error::{error}')
+              sys.exit(1)
+
+          print(f'Zip structure OK: {path}, uncompressed {total} bytes')
+          EOF
+      - name: Attach to release
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65
+        with:
+          files: ai-status-monitor@rloutrel.github.com.zip

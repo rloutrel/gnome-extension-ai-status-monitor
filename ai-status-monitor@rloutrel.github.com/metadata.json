@@ -1,0 +1,12 @@
+{
+    "name": "AI Status monitor",
+    "description": "This exetension allows to follow you AI usage",
+    "shell-version": [
+        "50"
+    ],
+    "uuid": "ai-status-monitor@rloutrel.github.com",
+    "developer": "Romain Loutrel",
+    "url": "https://github.com/rloutrel/gnome-extension-ai-status-monitor",
+    "gettext-domain": "ai-status-monitor@rloutrel.github.com",
+    "settings-schema": "org.gnome.shell.extensions.ai-status-monitor"
+}
