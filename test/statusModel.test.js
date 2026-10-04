@@ -130,7 +130,8 @@ test('providers: unique ids, well-formed URLs, default enabled', () => {
         assert.ok(provider.statusUrl.startsWith('https://'));
         assert.equal(typeof provider.defaultEnabled, 'boolean');
     }
-    assert.deepEqual(defaultEnabledIds(), ['openai', 'anthropic']);
+    assert.deepEqual(ids, [...ids].sort());
+    assert.deepEqual(defaultEnabledIds(), ['anthropic', 'openai']);
 });
 
 test('providers: getProvider', () => {
