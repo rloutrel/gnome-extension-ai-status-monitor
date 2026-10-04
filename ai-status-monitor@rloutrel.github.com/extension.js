@@ -19,6 +19,7 @@ export default class AiStatusMonitorExtension extends Extension {
         this._indicator = new Indicator({
             extensionPath: this.path,
             openPreferences: () => this.openPreferences(),
+            settings: this.getSettings(),
         });
         this._indicator.setup();
         Main.panel.addToStatusArea(this.uuid, this._indicator);

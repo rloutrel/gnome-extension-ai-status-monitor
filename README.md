@@ -1,8 +1,23 @@
-# GNOME Shell Extension Template
+# AI Status Monitor
 
-A modern template for GNOME Shell extensions, based on the structure and
-practices of [gnome-extension-nvme-monitor](https://github.com/rloutrel/gnome-extension-nvme-monitor).
-It targets the latest GNOME Shell GJS specifics and ships a full pipeline.
+A GNOME Shell extension to follow your AI subscriptions from the top bar:
+it polls the public status pages of your AI providers (OpenAI, Anthropic,
+Groq, Perplexity, ...) at a configurable interval and shows a color-coded,
+normalized status per provider. The panel icon reflects the worst status
+observed across the enabled providers.
+
+No API keys, no accounts: the extension only reads public, anonymous status
+feeds.
+
+Inspired by [3389ro/ai-status-monitor](https://github.com/3389ro/ai-status-monitor)
+and [montanhes/claude-status](https://github.com/montanhes/claude-status).
+
+## Features
+
+- Top-bar icon colored by the worst status across enabled providers
+- Dropdown menu with one row per provider and its normalized status
+- Clicking a provider opens its status page in the browser
+- Configurable poll interval and provider selection in the preferences
 
 ## What's in the box
 
@@ -31,20 +46,6 @@ It targets the latest GNOME Shell GJS specifics and ships a full pipeline.
 
 ## Getting started
 
-Adapt the template to your extension (renames the extension directory, UUID,
-GSettings schema, repository references, `metadata.json`, CI, SonarCloud):
-
-```bash
-./setup-project.sh <slug> "<Name>" "<Description>" [github-url] [developer]
-
-# Example
-./setup-project.sh nvme-monitor "NVMe Monitor" \
-    "Monitors NVMe device status in the top bar"
-```
-
-Then review `git diff`, adjust `README.md`, `extension.js` and the sample
-pure module to taste, and commit.
-
 ### Installing (development / manual)
 
 1. Copy or symlink the extension folder into your GNOME Shell extensions
@@ -66,13 +67,14 @@ pure module to taste, and commit.
 ## Repository layout
 
 ```text
-setup-project.sh    # Adapts the template to a new project (rename + rewrite)
 ai-status-monitor@rloutrel.github.com/
   extension.js       # GNOME Shell entry point: enable/disable lifecycle only
   indicator.js       # Panel indicator: menu construction, polling
   logger.js          # Unified debug/warn/error + notification helpers
   prefs.js           # Preferences window (separate GTK4/Adwaita process)
-  sampleModule.js    # PURE: example Node-testable module (remove or replace)
+  providers.js       # PURE: catalog of AI providers with a status feed
+  statusModel.js     # PURE: status normalization and aggregation
+  statusFetcher.js   # GJS: libsoup fetch of status feeds
   stylesheet.css     # Theme-aware styles (no hardcoded colors)
   metadata.json      # Shell version, UUID, version
   schemas/           # GSettings schema

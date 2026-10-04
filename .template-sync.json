@@ -1,0 +1,31 @@
+{
+  "source": "rloutrel/gnome-extension-template",
+  "ref": "template/v1.0.0",
+  "tracked": [
+    "extension.js",
+    "indicator.js",
+    "logger.js",
+    "prefs.js",
+    "stylesheet.css",
+    "test/validateMetadata.js",
+    ".github/workflows/test.yml",
+    ".github/workflows/release.yml",
+    ".github/workflows/codeql.yml",
+    "eslint.config.js",
+    "sonar-project.properties",
+    "po/POTFILES",
+    "AGENTS.md"
+  ],
+  "ignored": [
+    "sampleModule.js",
+    "test/sampleModule.test.js",
+    "metadata.json",
+    "README.md",
+    "setup-project.sh",
+    "providers.js",
+    "statusModel.js",
+    "statusFetcher.js",
+    "schemas/org.gnome.shell.extensions.ai-status-monitor.gschema.xml",
+    "test/statusModel.test.js"
+  ]
+}

@@ -4,6 +4,7 @@ import Adw from 'gi://Adw';
 import Gio from 'gi://Gio';
 import Gtk from 'gi://Gtk';
 import {ExtensionPreferences, gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
+import {PROVIDERS, defaultEnabledIds} from './providers.js';
 
 export default class AiStatusMonitorPreferences extends ExtensionPreferences {
     fillPreferencesWindow(window) {
@@ -15,23 +16,60 @@ export default class AiStatusMonitorPreferences extends ExtensionPreferences {
         });
         window.add(page);
 
-        const group = new Adw.PreferencesGroup({
-            title: _('Sample'),
-            description: _('Example settings group'),
+        const providersGroup = new Adw.PreferencesGroup({
+            title: _('Providers'),
+            description: _('AI subscriptions to follow in the top bar'),
         });
-        page.add(group);
+        page.add(providersGroup);
 
-        const sampleRow = new Adw.ActionRow({
-            title: _('Sample boolean setting'),
+        const enabled = new Set(settings.get_strv('enabled-providers'));
+        for (const provider of PROVIDERS) {
+            const row = new Adw.ActionRow({title: provider.name});
+            providersGroup.add(row);
+
+            const check = Gtk.CheckButton.new();
+            check.set_valign(Gtk.Align.CENTER);
+            if (enabled.has(provider.id))
+                check.set_active(true);
+            check.connect('toggled', () => {
+                const ids = new Set(settings.get_strv('enabled-providers'));
+                if (check.get_active())
+                    ids.add(provider.id);
+                else
+                    ids.delete(provider.id);
+                settings.set_strv('enabled-providers', [...ids]);
+            });
+            row.add_suffix(check);
+        }
+
+        const resetRow = new Adw.ActionRow({
+            title: _('Reset to defaults'),
         });
-        group.add(sampleRow);
-
-        const sampleSwitch = new Gtk.Switch({
+        providersGroup.add(resetRow);
+        const resetButton = new Gtk.Button({
+            label: _('Reset'),
             valign: Gtk.Align.CENTER,
         });
-        sampleRow.add_suffix(sampleSwitch);
+        resetButton.connect('clicked', () => {
+            settings.set_strv('enabled-providers', defaultEnabledIds());
+            settings.set_int('poll-interval', 300);
+        });
+        resetRow.add_suffix(resetButton);
 
-        settings.bind('sample-boolean', sampleSwitch, 'active',
+        const generalGroup = new Adw.PreferencesGroup({
+            title: _('Polling'),
+        });
+        page.add(generalGroup);
+
+        const intervalRow = new Adw.ActionRow({
+            title: _('Poll interval'),
+            subtitle: _('Seconds between status checks (minimum 60)'),
+        });
+        generalGroup.add(intervalRow);
+        const intervalSpin = Gtk.SpinButton.new_with_range(60, 3600, 30);
+        intervalSpin.set_valign(Gtk.Align.CENTER);
+        intervalRow.add_suffix(intervalSpin);
+        settings.bind('poll-interval', intervalSpin, 'value',
             Gio.SettingsBindFlags.DEFAULT);
 
         const creditsGroup = new Adw.PreferencesGroup({

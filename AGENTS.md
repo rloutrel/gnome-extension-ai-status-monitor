@@ -26,7 +26,9 @@ ai-status-monitor@rloutrel.github.com/
   indicator.js       # Panel indicator: menu construction, polling.
   logger.js          # Unified debug/warn/error + notification helpers.
   prefs.js           # Preferences window (GTK4/Adwaita process).
-  sampleModule.js    # PURE: example Node-testable module.
+  providers.js       # PURE: provider catalog (status feed URLs).
+  statusModel.js     # PURE: status normalization and aggregation.
+  statusFetcher.js   # GJS: libsoup fetch of status feeds.
   stylesheet.css     # Theme-aware styles (no hardcoded colors).
   metadata.json      # Shell version, UUID, version.
   schemas/           # GSettings schema.
@@ -34,12 +36,13 @@ ai-status-monitor@rloutrel.github.com/
 
 ### Pure vs GJS modules
 
-A hard rule: **`sampleModule.js` (and any module you add like it) is a pure
-module with zero GJS/GObject imports.** Pure modules run under plain Node and
-are unit-tested there. Do **not** add `gi://` or `resource:///` imports to
-them. Anything that touches `Gio`, `GLib`, `St`, `Clutter`, `Main`, or
-GObject belongs in a GJS-only module (`extension.js`, `indicator.js`,
-`prefs.js`, `logger.js`), never in a pure module.
+A hard rule: **pure modules (`providers.js`, `statusModel.js`, and any
+module you add like them) have zero GJS/GObject imports.** Pure modules run
+under plain Node and are unit-tested there. Do **not** add `gi://` or
+`resource:///` imports to them. Anything that touches `Gio`, `GLib`, `St`,
+`Clutter`, `Main`, or GObject belongs in a GJS-only module (`extension.js`,
+`indicator.js`, `prefs.js`, `logger.js`, `statusFetcher.js`), never in a pure
+module.
 
 Keep this split when the template grows: move domain logic (parsing,
 formatting, state) into pure modules so it stays unit-testable.

@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
   <schema id="org.gnome.shell.extensions.ai-status-monitor"
-          path="/org.gnome.shell.extensions.ai-status-monitor/">
-    <key name="sample-boolean" type="b">
-      <default>false</default>
-      <summary>Sample boolean setting</summary>
-      <description>Example boolean setting demonstrated in the preferences window</description>
+          path="/org/gnome.shell.extensions.ai-status-monitor/">
+    <key name="enabled-providers" type="as">
+      <default>['openai', 'anthropic']</default>
+      <summary>Enabled providers</summary>
+      <description>List of AI provider IDs whose status pages are monitored</description>
+    </key>
+    <key name="poll-interval" type="i">
+      <default>300</default>
+      <summary>Poll interval in seconds</summary>
+      <description>Seconds between status page checks (minimum 60)</description>
     </key>
   </schema>
 </schemalist>
