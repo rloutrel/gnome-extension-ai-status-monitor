@@ -1,10 +1,14 @@
 // Preferences page. Runs in a separate GTK4/Adwaita process, without
 // access to GNOME Shell.
 import Adw from 'gi://Adw';
+import Gdk from 'gi://Gdk';
 import Gio from 'gi://Gio';
 import Gtk from 'gi://Gtk';
 import {ExtensionPreferences, gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 import {PROVIDERS, defaultEnabledIds} from './providers.js';
+
+const MISTRAL_BACKOFFICE_API_KEYS_URL =
+    'https://backoffice.mistral.ai/';
 
 export default class AiStatusMonitorPreferences extends ExtensionPreferences {
     fillPreferencesWindow(window) {
@@ -55,6 +59,31 @@ export default class AiStatusMonitorPreferences extends ExtensionPreferences {
             settings.set_int('poll-interval', 300);
         });
         resetRow.add_suffix(resetButton);
+
+        const mistralGroup = new Adw.PreferencesGroup({
+            title: _('Mistral'),
+            description: _(
+                'Follow your Mistral usage and spending limits with the Admin API'),
+        });
+        page.add(mistralGroup);
+
+        const apiKeyRow = new Adw.ActionRow({
+            title: _('Admin API key'),
+            subtitle: _(
+                'Create a dedicated Admin API key: it grants read access to ' +
+                'usage and limits without consuming credits'),
+        });
+        mistralGroup.add(apiKeyRow);
+
+        const generateKeyButton = new Gtk.Button({
+            label: _('Generate'),
+            valign: Gtk.Align.CENTER,
+        });
+        generateKeyButton.connect('clicked', () => {
+            Gtk.show_uri(window, MISTRAL_BACKOFFICE_API_KEYS_URL,
+                Gdk.CURRENT_TIME);
+        });
+        apiKeyRow.add_suffix(generateKeyButton);
 
         const generalGroup = new Adw.PreferencesGroup({
             title: _('Polling'),
