@@ -2,16 +2,9 @@
 // Zero GJS/GObject imports; unit-tested under plain Node.
 
 export const FEED_STATUSPAGE = 'statuspage';
+export const FEED_MISTRAL_ADMIN = 'mistral-admin';
 
 export const PROVIDERS = [
-    {
-        id: 'openai',
-        name: 'OpenAI',
-        feed: FEED_STATUSPAGE,
-        statusUrl: 'https://status.openai.com/api/v2/summary.json',
-        pageUrl: 'https://status.openai.com/',
-        defaultEnabled: true,
-    },
     {
         id: 'anthropic',
         name: 'Anthropic Claude',
@@ -27,6 +20,22 @@ export const PROVIDERS = [
         statusUrl: 'https://status.groq.com/api/v2/summary.json',
         pageUrl: 'https://status.groq.com/',
         defaultEnabled: false,
+    },
+    {
+        id: 'mistral',
+        name: 'Mistral',
+        feed: FEED_MISTRAL_ADMIN,
+        statusUrl: 'https://api.mistral.ai/v1/admin/usage',
+        pageUrl: 'https://console.mistral.ai/',
+        defaultEnabled: false,
+    },
+    {
+        id: 'openai',
+        name: 'OpenAI',
+        feed: FEED_STATUSPAGE,
+        statusUrl: 'https://status.openai.com/api/v2/summary.json',
+        pageUrl: 'https://status.openai.com/',
+        defaultEnabled: true,
     },
     {
         id: 'perplexity',
